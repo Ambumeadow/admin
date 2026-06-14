@@ -4,6 +4,9 @@ import {
   FaUserMd,
   FaUsers,
   FaClipboardList,
+  FaAmbulance,
+  FaCrown,
+  FaCogs,
 } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -11,7 +14,7 @@ export default function Sidebar() {
     <div className="w-64 bg-teal-700 text-white min-h-screen p-4">
 
       <h1 className="text-2xl font-bold mb-8">
-        AfyaCare
+        Vitacura
       </h1>
 
       <div className="space-y-3">
@@ -41,11 +44,51 @@ export default function Sidebar() {
         </Link>
 
         <Link
+          to="/nurses"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+          <FaUserMd />
+          Nurses
+        </Link>
+
+        <Link
           to="/medical-records"
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
         >
           <FaClipboardList />
           Medical Records
+        </Link>
+
+        <Link
+          to="/ambulances"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+          <FaAmbulance />
+          Ambulances
+        </Link>
+
+        <Link
+          to="/packages"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+          <FaCrown />
+          Packages
+        </Link>
+
+        <Link
+          to="/subscriptions"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+          <FaClipboardList />
+          Subscriptions
+        </Link>
+
+        <Link
+          to="/settings"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+          <FaCogs />
+          Settings
         </Link>
 
       </div>
