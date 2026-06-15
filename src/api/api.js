@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000"; // Change to your Django server URL
+const API_URL = "http://192.168.100.12:8000"; // Change to your Django server URL
 
 const api = axios.create({
   baseURL: API_URL,
@@ -57,7 +57,7 @@ api.interceptors.response.use(
           response.data.access_token;
 
         localStorage.setItem(
-          "token",
+          "access_token",
           newAccessToken
         );
 

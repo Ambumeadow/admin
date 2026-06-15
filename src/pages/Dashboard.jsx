@@ -1,5 +1,3 @@
-"use client"; // Include this if using Next.js App Router
-
 import { useState, useEffect } from "react";
 import {
   FaUserInjured,
@@ -30,14 +28,14 @@ const RECENT_ACTIVITIES = [
 ];
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [staff, setStaff] = useState(null);
 
   // 2. Safe localStorage fetching after component mounts (fixes SSR crashes)
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      const storedStaff = localStorage.getItem("staff");
+      if (storedStaff) {
+        setStaff(JSON.parse(storedStaff));
       }
     } catch (error) {
       console.error("Failed to parse user data from localStorage", error);
@@ -52,7 +50,7 @@ export default function Dashboard() {
         <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-3xl p-8 text-white shadow-lg">
           <h1 className="text-4xl font-bold mb-2">Welcome Back 👋</h1>
           <p className="text-teal-100 text-lg">
-            {user?.full_name || "Administrator"}
+            {staff?.staff_name || "Administrator"}
           </p>
           <p className="mt-4 text-teal-50">
             Manage patients, staff, appointments, subscriptions, medical records and healthcare operations.

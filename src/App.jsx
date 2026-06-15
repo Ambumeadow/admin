@@ -9,6 +9,11 @@ import Ambulances from "./pages/Ambulances";
 import Packages from "./pages/Packages";
 import Subscription from "./pages/Subscriptions";
 import Settings from "./pages/Settings";
+import Appointments from "./pages/Appointments";
+import MyAppointments from "./pages/MyAppointments";
+import Notifications from "./pages/Notifications";
+import MedicalRecords from "./pages/MedicalRecords";
+import Pharmacy from "./pages/Pharmacy";
 
 function App() {
   return (
@@ -26,6 +31,12 @@ function App() {
         <Route path="/packages" element={<Packages />} />
         <Route path="/subscriptions" element={<Subscription />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/appointments" element={<Appointments />} />
+        <Route path="/my-appointments" element={<MyAppointments />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/pharmacy" element={<Pharmacy />} />
+
     
       </Routes>
 

@@ -1,8 +1,9 @@
 import { FaBell, FaSearch } from "react-icons/fa";
 import { MdOutlineSettings } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const staff = JSON.parse(localStorage.getItem("staff"));
 
   return (
     <div className="bg-white shadow-sm rounded-2xl px-6 py-4 flex items-center justify-between mb-6">
@@ -33,6 +34,9 @@ export default function Navbar() {
         </div>
 
         {/* Notifications */}
+        <Link
+        to="/notifications"
+        >
         <button className="relative bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition">
           <FaBell className="text-gray-700 text-lg" />
 
@@ -40,28 +44,31 @@ export default function Navbar() {
             3
           </span>
         </button>
+        </Link>
 
         {/* Settings */}
+        <Link to="/settings">
         <button className="bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition">
           <MdOutlineSettings className="text-gray-700 text-xl" />
         </button>
+        </Link>
 
         {/* User */}
         <div className="flex items-center gap-3 bg-teal-50 px-3 py-2 rounded-xl">
           
           <div className="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold">
-            {user?.full_name
-              ? user.full_name.charAt(0).toUpperCase()
+            {staff?.staff_name
+              ? staff.staff_name.charAt(0).toUpperCase()
               : "A"}
           </div>
 
           <div className="hidden md:block">
             <p className="font-semibold text-gray-800">
-              {user?.full_name || "Admin"}
+              {staff?.staff_name || "Admin"}
             </p>
 
             <p className="text-xs text-gray-500 capitalize">
-              {user?.role || "Administrator"}
+              {staff?.role || "Administrator"}
             </p>
           </div>
 

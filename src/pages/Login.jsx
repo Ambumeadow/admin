@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash, FaHospitalUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,13 +19,13 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await api.post("/login/", {
+      const response = await api.post("/staff_signin/", {
         email,
         password,
       });
 
       localStorage.setItem(
-        "token",
+        "access_token",
         response.data.access_token
       );
 
@@ -34,8 +35,8 @@ export default function Login() {
       );
 
       localStorage.setItem(
-        "user",
-        JSON.stringify(response.data.user)
+        "staff",
+        JSON.stringify(response.data.staff)
       );
 
       navigate("/dashboard");
@@ -43,10 +44,17 @@ export default function Login() {
     } catch (error) {
       console.log(error);
 
-      alert(
-        error?.response?.data?.message ||
-        "Invalid credentials"
-      );
+      // alert(
+      //   error?.response?.data?.message ||
+      //   "Invalid credentials"
+      // );
+
+      Swal.fire({
+        title: "An error occurred!",
+        text: error?.response?.data?.message || "Invalid credentials",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }

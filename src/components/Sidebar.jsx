@@ -7,7 +7,9 @@ import {
   FaAmbulance,
   FaCrown,
   FaCogs,
+  FaCalendarCheck,
 } from "react-icons/fa";
+import { FaPills } from "react-icons/fa";
 
 export default function Sidebar() {
   return (
@@ -81,6 +83,30 @@ export default function Sidebar() {
         >
           <FaClipboardList />
           Subscriptions
+        </Link>
+
+        <Link
+          to="/appointments"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+        <FaCalendarCheck />
+        Appointments
+        </Link>
+
+        <Link
+          to="/my-appointments"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+        <FaCalendarCheck />
+        My Appointments
+        </Link>
+
+        <Link
+          to="/pharmacy"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-teal-600"
+        >
+        <FaPills />
+        Pharmacy
         </Link>
 
         <Link
