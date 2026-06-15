@@ -8,10 +8,11 @@ import {
   FaMoneyBillWave,
 } from "react-icons/fa";
 import DashboardLayout from "../layouts/DashboardLayout";
+import api from "../api/api";
 
 // 1. Move static configuration data OUTSIDE the component to prevent recreation on every render
 const STATS_CONFIG = [
-  { id: "patients", title: "Patients", value: 1250, icon: <FaUserInjured size={28} /> },
+  { id: "users", title: "Users", value: 1250, icon: <FaUserInjured size={28} /> },
   { id: "doctors", title: "Doctors", value: 42, icon: <FaUserMd size={28} /> },
   { id: "nurses", title: "Nurses", value: 68, icon: <FaUserNurse size={28} /> },
   { id: "appointments", title: "Appointments", value: 315, icon: <FaCalendarCheck size={28} /> },
@@ -29,6 +30,47 @@ const RECENT_ACTIVITIES = [
 
 export default function Dashboard() {
   const [staff, setStaff] = useState(null);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalDoctors, setTotalDoctors] = useState(0);
+
+  const stats = [
+  {
+    id: "users",
+    title: "Users",
+    value: totalUsers || "Loading...",
+    icon: <FaUserInjured size={28} />,
+  },
+  {
+    id: "doctors",
+    title: "Doctors",
+    value: totalDoctors || "Loading...",
+    icon: <FaUserMd size={28} />,
+  },
+  {
+    id: "nurses",
+    title: "Nurses",
+    value: 68,
+    icon: <FaUserNurse size={28} />,
+  },
+  {
+    id: "appointments",
+    title: "Appointments",
+    value: 315,
+    icon: <FaCalendarCheck size={28} />,
+  },
+  {
+    id: "ambulances",
+    title: "Ambulances",
+    value: 12,
+    icon: <FaAmbulance size={28} />,
+  },
+  {
+    id: "revenue",
+    title: "Revenue",
+    value: "KES 580K",
+    icon: <FaMoneyBillWave size={28} />,
+  },
+];
 
   // 2. Safe localStorage fetching after component mounts (fixes SSR crashes)
   useEffect(() => {
@@ -41,6 +83,28 @@ export default function Dashboard() {
       console.error("Failed to parse user data from localStorage", error);
     }
   }, []);
+
+ useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      const [
+        usersResponse,
+        doctorsResponse,
+      ] = await Promise.all([
+        api.get("/get_all_users/"),
+        api.get("/get_all_doctors/"),
+      ]);
+
+      setTotalUsers(usersResponse.data.total_users);
+      setTotalDoctors(doctorsResponse.data.total_doctors);
+
+    } catch (err) {
+      console.error("An error occurred:", err);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
 
   return (
     <DashboardLayout>
@@ -59,7 +123,7 @@ export default function Dashboard() {
 
         {/* Statistics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {STATS_CONFIG.map((item) => (
+          {stats.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition duration-200"
