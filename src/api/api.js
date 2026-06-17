@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.100.12:8000"; // Change to your Django server URL
+const API_URL = "http://10.110.44.125:8000"; // Change to your Django server URL
 
 const api = axios.create({
   baseURL: API_URL,

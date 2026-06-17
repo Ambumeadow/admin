@@ -14,7 +14,7 @@ export default function Ambulances() {
     try {
       setLoading(true);
 
-      const response = await api.get("/ambulances/");
+      const response = await api.get("/get_all_ambulances/");
 
       setAmbulances(response.data.ambulances);
       setFiltered(response.data.ambulances);

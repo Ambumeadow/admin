@@ -18,7 +18,7 @@ export default function Pharmacy() {
 
   const fetchDrugs = async () => {
     try {
-      const response = await api.get("/drugs/");
+      const response = await api.get("/get_all_drugs/");
       setDrugs(response.data.drugs);
       setFilteredDrugs(response.data.drugs);
     } catch (error) {

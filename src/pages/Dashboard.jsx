@@ -32,6 +32,10 @@ export default function Dashboard() {
   const [staff, setStaff] = useState(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalDoctors, setTotalDoctors] = useState(0);
+  const [totalNurses, setTotalNurses] = useState(0);
+  const [totalAppointments, setTotalAppointments] = useState(0);
+  const [totalAmbulances, setTotalAmbulances] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   const stats = [
   {
@@ -49,25 +53,25 @@ export default function Dashboard() {
   {
     id: "nurses",
     title: "Nurses",
-    value: 68,
+    value: totalNurses,
     icon: <FaUserNurse size={28} />,
   },
   {
     id: "appointments",
     title: "Appointments",
-    value: 315,
+    value: totalAppointments,
     icon: <FaCalendarCheck size={28} />,
   },
   {
     id: "ambulances",
     title: "Ambulances",
-    value: 12,
+    value: totalAmbulances,
     icon: <FaAmbulance size={28} />,
   },
   {
     id: "revenue",
     title: "Revenue",
-    value: "KES 580K",
+    value: totalRevenue,
     icon: <FaMoneyBillWave size={28} />,
   },
 ];
@@ -90,13 +94,25 @@ export default function Dashboard() {
       const [
         usersResponse,
         doctorsResponse,
+        nursesResponse,
+        appointmentsResponse,
+        ambulanceResponse,
+        revenueResponse,
       ] = await Promise.all([
         api.get("/get_all_users/"),
         api.get("/get_all_doctors/"),
+        api.get("/get_all_nurses/"),
+        api.get("/get_all_appointments/"),
+        api.get("/get_all_ambulances/"),
+        api.get("/get_all_payments/"),
       ]);
 
       setTotalUsers(usersResponse.data.total_users);
       setTotalDoctors(doctorsResponse.data.total_doctors);
+      setTotalNurses(nursesResponse.data.total_nurses);
+      setTotalAppointments(appointmentsResponse.data.total_appointments);
+      setTotalAmbulances(ambulanceResponse.data.total_ambulances);
+      setTotalRevenue(revenueResponse.data.total_revenue);
 
     } catch (err) {
       console.error("An error occurred:", err);

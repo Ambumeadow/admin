@@ -13,7 +13,7 @@ export default function Packages() {
     try {
       setLoading(true);
 
-      const response = await api.get("/packages/");
+      const response = await api.get("/get_packages/");
 
       setPackages(response.data.packages);
 
@@ -29,25 +29,16 @@ export default function Packages() {
     fetchPackages();
   }, []);
 
-  // Subscribe to package
-  const subscribePackage = async (packageId) => {
-    try {
-      setSubscribing(packageId);
+  const deletePackage = async (id) => {
+  try {
+    await api.delete(`/delete_package/${id}/`);
 
-      const response = await api.post("/subscribe_package/", {
-        package_id: packageId,
-      });
+    fetchPackages();
 
-      alert(response.data.message || "Subscribed successfully");
-
-    } catch (error) {
-      console.log(error);
-      alert("Subscription failed");
-
-    } finally {
-      setSubscribing(null);
-    }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <DashboardLayout>
@@ -138,15 +129,22 @@ export default function Packages() {
               </div>
 
               {/* Button */}
-              <button
-                onClick={() => subscribePackage(pkg.id)}
-                disabled={subscribing === pkg.id}
-                className="mt-6 w-full bg-teal-600 text-white py-3 rounded-xl hover:bg-teal-700 transition disabled:opacity-50"
-              >
-                {subscribing === pkg.id
-                  ? "Subscribing..."
-                  : "Subscribe"}
-              </button>
+              <div className="mt-6 flex gap-2">
+
+  <button
+    className="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700"
+  >
+    Edit
+  </button>
+
+  <button
+    onClick={() => deletePackage(pkg.id)}
+    className="flex-1 bg-red-600 text-white py-3 rounded-xl hover:bg-red-700"
+  >
+    Delete
+  </button>
+
+</div>
 
             </div>
           ))}

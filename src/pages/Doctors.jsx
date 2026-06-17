@@ -14,7 +14,7 @@ export default function Doctors() {
     try {
       setLoading(true);
 
-      const response = await api.get("/doctors/");
+      const response = await api.get("/get_all_doctors/");
 
       setDoctors(response.data.doctors);
       setFiltered(response.data.doctors);
@@ -116,7 +116,7 @@ export default function Doctors() {
             <thead className="bg-teal-600 text-white">
               <tr>
                 <th className="p-3 text-left">Doctor</th>
-                <th className="p-3 text-left">Specialization</th>
+                <th className="p-3 text-left">Hospital</th>
                 <th className="p-3 text-left">Department</th>
                 <th className="p-3 text-left">Phone</th>
                 <th className="p-3 text-left">Status</th>
@@ -161,7 +161,7 @@ export default function Doctors() {
 
                     {/* Specialization */}
                     <td className="p-3">
-                      {doctor.specialization}
+                      {doctor.hospital}
                     </td>
 
                     {/* Department */}
@@ -176,7 +176,7 @@ export default function Doctors() {
 
                     {/* Status */}
                     <td className="p-3">
-                      {doctor.is_available ? (
+                      {doctor.is_active ? (
                         <span className="text-green-600 font-semibold">
                           Available
                         </span>

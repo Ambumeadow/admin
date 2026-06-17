@@ -14,7 +14,7 @@ export default function Nurses() {
     try {
       setLoading(true);
 
-      const response = await api.get("/nurses/");
+      const response = await api.get("/get_all_nurses/");
 
       setNurses(response.data.nurses);
       setFiltered(response.data.nurses);
