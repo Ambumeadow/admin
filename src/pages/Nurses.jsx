@@ -1,27 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import api from "../api/api";
-import { FaSearch, FaUserNurse } from "react-icons/fa";
+
+import {
+  FaSearch,
+  FaUserNurse,
+  FaHospital,
+  FaPhoneAlt,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSyncAlt,
+  FaCrown,
+  FaBed,
+} from "react-icons/fa";
+
 import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function Nurses() {
   const [nurses, setNurses] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Fetch nurses
   const fetchNurses = async () => {
     try {
       setLoading(true);
 
       const response = await api.get("/get_all_nurses/");
 
-      setNurses(response.data.nurses);
-      setFiltered(response.data.nurses);
-
+      setNurses(response.data.nurses || []);
     } catch (error) {
-      console.log(error);
-
+      console.log("Fetch nurses error:", error);
     } finally {
       setLoading(false);
     }
@@ -31,176 +39,534 @@ export default function Nurses() {
     fetchNurses();
   }, []);
 
-  // Search filter
-  useEffect(() => {
-    const results = nurses.filter((n) =>
-      n.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-      n.department?.toLowerCase().includes(search.toLowerCase()) ||
-      n.ward?.toLowerCase().includes(search.toLowerCase())
-    );
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-    setFiltered(results);
-  }, [search, nurses]);
+    if (!query) {
+      return nurses;
+    }
+
+    return nurses.filter((nurse) => {
+      return (
+        nurse?.full_name
+          ?.toLowerCase()
+          .includes(query) ||
+        nurse?.email
+          ?.toLowerCase()
+          .includes(query) ||
+        nurse?.department
+          ?.toLowerCase()
+          .includes(query) ||
+        nurse?.ward
+          ?.toLowerCase()
+          .includes(query) ||
+        nurse?.phone_number
+          ?.toLowerCase()
+          .includes(query)
+      );
+    });
+  }, [nurses, search]);
+
+  const onDuty = nurses.filter(
+    (nurse) => nurse.is_on_duty
+  ).length;
+
+  const offDuty = nurses.filter(
+    (nurse) => !nurse.is_on_duty
+  ).length;
+
+  const totalDepartments = new Set(
+    nurses
+      .map((nurse) => nurse.department)
+      .filter(Boolean)
+  ).size;
+
+  const getInitials = (name) => {
+    if (!name) {
+      return "NR";
+    }
+
+    const parts = name.trim().split(" ");
+
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+
+    return `${parts[0].charAt(0)}${parts[
+      parts.length - 1
+    ].charAt(0)}`.toUpperCase();
+  };
 
   return (
     <DashboardLayout>
-    <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
+        {/* HEADER */}
+        <div className="relative overflow-hidden rounded-[22px] sm:rounded-[26px] bg-gradient-to-r from-[#0A274A] via-[#123B70] to-[#08764F] px-5 py-5 sm:px-6 sm:py-6 md:px-8 md:py-7 text-white shadow-[0_14px_35px_rgba(18,59,112,0.16)]">
+          <div className="absolute -top-16 -right-16 w-48 sm:w-60 h-48 sm:h-60 rounded-full bg-[#C6A24A]/10" />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
+          <div className="absolute bottom-[-60px] left-[30%] w-40 h-40 rounded-full bg-white/5" />
 
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Nurses
-          </h1>
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 border border-[#E8D58C]/40 flex items-center justify-center shrink-0">
+                <FaUserNurse className="text-[#E8D58C] text-xl sm:text-2xl" />
+              </div>
 
-          <p className="text-gray-500">
-            Manage hospital nursing staff
-          </p>
+              <div className="min-w-0">
+                <div className="w-12 h-1 rounded-full bg-[#C6A24A] mb-3" />
+
+                <h1 className="text-2xl md:text-3xl font-extrabold">
+                  Nurses
+                </h1>
+
+                <p className="text-white/70 text-xs sm:text-sm mt-1 max-w-xl">
+                  Manage nursing staff, departments, wards and duty
+                  availability.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={fetchNurses}
+              disabled={loading}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#C6A24A] text-[#0A274A] font-bold text-sm hover:bg-[#E8D58C] transition disabled:opacity-50"
+            >
+              <FaSyncAlt
+                className={loading ? "animate-spin" : ""}
+              />
+
+              Refresh Nurses
+            </button>
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="flex items-center bg-white px-4 py-2 rounded-xl shadow">
-          <FaSearch className="text-gray-400" />
+        {/* SEARCH */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4 shadow-[0_6px_20px_rgba(15,23,42,0.04)]">
+          <div className="h-12 flex items-center rounded-xl border border-gray-200 bg-[#F8FAF9] px-3 sm:px-4 focus-within:border-[#C6A24A] focus-within:ring-4 focus-within:ring-[#C6A24A]/10 transition">
+            <FaSearch className="text-[#C6A24A] text-sm shrink-0" />
 
-          <input
-            type="text"
-            placeholder="Search nurses..."
-            className="ml-3 outline-none"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            <input
+              type="text"
+              placeholder="Search nurses, department or ward..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ml-3 w-full bg-transparent outline-none text-sm text-[#102033] placeholder:text-gray-400 min-w-0"
+            />
+
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="text-xs font-semibold text-gray-400 hover:text-[#C6A24A] transition shrink-0"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* STATS */}
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
+          <StatCard
+            title="Total Nurses"
+            value={nurses.length}
+            subtitle="Registered staff"
+            icon={FaUserNurse}
+            iconBg="bg-[#123B70]/10"
+            iconColor="text-[#123B70]"
+          />
+
+          <StatCard
+            title="On Duty"
+            value={onDuty}
+            subtitle="Currently available"
+            icon={FaCheckCircle}
+            iconBg="bg-[#08764F]/10"
+            iconColor="text-[#08764F]"
+          />
+
+          <StatCard
+            title="Departments"
+            value={totalDepartments}
+            subtitle="Clinical units"
+            icon={FaCrown}
+            iconBg="bg-[#C6A24A]/15"
+            iconColor="text-[#C6A24A]"
+            gold
+          />
+
+          <StatCard
+            title="Off Duty"
+            value={offDuty}
+            subtitle="Currently unavailable"
+            icon={FaTimesCircle}
+            iconBg="bg-red-50"
+            iconColor="text-red-600"
           />
         </div>
 
-      </div>
+        {/* DIRECTORY HEADING */}
+        {!loading && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-[#102033]">
+                Nursing Staff Directory
+              </h2>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                {filtered.length}{" "}
+                {filtered.length === 1
+                  ? "nurse"
+                  : "nurses"}{" "}
+                shown
+              </p>
+            </div>
 
-        <div className="bg-white p-5 rounded-2xl shadow">
-          <p className="text-gray-500">Total Nurses</p>
-          <h2 className="text-3xl font-bold text-teal-600">
-            {nurses.length}
-          </h2>
-        </div>
+            <div className="inline-flex self-start sm:self-auto items-center gap-2 rounded-full bg-[#C6A24A]/10 border border-[#C6A24A]/20 px-3 py-1.5">
+              <FaCrown className="text-[#C6A24A] text-xs" />
 
-        <div className="bg-white p-5 rounded-2xl shadow">
-          <p className="text-gray-500">On Duty</p>
-          <h2 className="text-3xl font-bold text-green-600">
-            {
-              nurses.filter((n) => n.is_on_duty).length
-            }
-          </h2>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl shadow">
-          <p className="text-gray-500">Departments</p>
-          <h2 className="text-3xl font-bold text-purple-600">
-            {new Set(nurses.map((n) => n.department)).size}
-          </h2>
-        </div>
-
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-2xl shadow overflow-x-auto">
-
-        {loading ? (
-          <div className="p-10 text-center text-gray-500">
-            Loading nurses...
+              <span className="text-[10px] font-extrabold tracking-wide text-[#8B6A22]">
+                NURSING TEAM
+              </span>
+            </div>
           </div>
-        ) : (
-
-          <table className="w-full">
-
-            <thead className="bg-teal-600 text-white">
-              <tr>
-                <th className="p-3 text-left">Nurse</th>
-                <th className="p-3 text-left">Department</th>
-                <th className="p-3 text-left">Ward</th>
-                <th className="p-3 text-left">Phone</th>
-                <th className="p-3 text-left">Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {filtered.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="p-6 text-center text-gray-500"
-                  >
-                    No nurses found
-                  </td>
-                </tr>
-              ) : (
-
-                filtered.map((nurse) => (
-                  <tr
-                    key={nurse.id}
-                    className="border-b hover:bg-gray-50"
-                  >
-
-                    {/* Nurse */}
-                    <td className="p-3 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center">
-                        <FaUserNurse />
-                      </div>
-
-                      <div>
-                        <p className="font-semibold">
-                          {nurse.full_name}
-                        </p>
-
-                        <p className="text-sm text-gray-500">
-                          {nurse.email}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Department */}
-                    <td className="p-3">
-                      {nurse.department}
-                    </td>
-
-                    {/* Ward */}
-                    <td className="p-3">
-                      {nurse.ward}
-                    </td>
-
-                    {/* Phone */}
-                    <td className="p-3">
-                      {nurse.phone_number}
-                    </td>
-
-                    {/* Status */}
-                    <td className="p-3">
-                      {nurse.is_on_duty ? (
-                        <span className="text-green-600 font-semibold">
-                          On Duty
-                        </span>
-                      ) : (
-                        <span className="text-red-600 font-semibold">
-                          Off Duty
-                        </span>
-                      )}
-                    </td>
-
-                  </tr>
-                ))
-
-              )}
-
-            </tbody>
-
-          </table>
-
         )}
 
-      </div>
+        {/* LOADING */}
+        {loading ? (
+          <div className="bg-white border border-gray-200 rounded-[22px] sm:rounded-[24px] py-20 flex flex-col items-center justify-center shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+            <div className="w-14 h-14 rounded-2xl bg-[#C6A24A]/15 flex items-center justify-center">
+              <FaSyncAlt className="text-[#C6A24A] text-xl animate-spin" />
+            </div>
 
-    </div>
+            <p className="text-[#102033] font-semibold mt-4">
+              Loading nurses...
+            </p>
+
+            <p className="text-gray-400 text-sm mt-1">
+              Fetching nursing staff information
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
+          /* EMPTY STATE */
+          <div className="bg-white border border-gray-200 rounded-[22px] sm:rounded-[24px] py-16 sm:py-20 px-5 flex flex-col items-center text-center shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+            <div className="w-20 h-20 rounded-[24px] bg-[#C6A24A]/15 border border-[#C6A24A]/20 flex items-center justify-center">
+              <FaUserNurse className="text-[#C6A24A] text-3xl" />
+            </div>
+
+            <h3 className="text-lg font-extrabold text-[#102033] mt-5">
+              No Nurses Found
+            </h3>
+
+            <p className="text-gray-500 text-sm mt-2 max-w-md">
+              {search
+                ? "No nurses match your current search."
+                : "No nurse records are currently available."}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* MOBILE CARDS */}
+            <div className="md:hidden space-y-4">
+              {filtered.map((nurse) => (
+                <NurseMobileCard
+                  key={nurse.id}
+                  nurse={nurse}
+                  initials={getInitials(
+                    nurse.full_name
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* DESKTOP / TABLET TABLE */}
+            <div className="hidden md:block bg-white border border-gray-200 rounded-[24px] overflow-hidden shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[950px]">
+                  <thead>
+                    <tr className="bg-[#0A274A]">
+                      <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#E8D58C]">
+                        Nurse
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#E8D58C]">
+                        Department
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#E8D58C]">
+                        Ward
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#E8D58C]">
+                        Phone
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[#E8D58C]">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-gray-100">
+                    {filtered.map((nurse) => (
+                      <tr
+                        key={nurse.id}
+                        className="hover:bg-[#FCFBF6] transition"
+                      >
+                        {/* NURSE */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-[#123B70]/10 border-2 border-[#C6A24A] flex items-center justify-center shrink-0">
+                              <span className="text-[#123B70] text-sm font-extrabold">
+                                {getInitials(
+                                  nurse.full_name
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="font-bold text-[#102033]">
+                                {nurse.full_name ||
+                                  "Unknown Nurse"}
+                              </p>
+
+                              <p className="text-xs text-gray-400 mt-1">
+                                {nurse.email ||
+                                  "Email unavailable"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* DEPARTMENT */}
+                        <td className="px-5 py-4">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#E8D58C]/20 text-[#8B6A22] text-xs font-semibold">
+                            <FaHospital className="text-[#C6A24A]" />
+
+                            {nurse.department ||
+                              "General"}
+                          </div>
+                        </td>
+
+                        {/* WARD */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FaBed className="text-[#123B70] text-xs" />
+
+                            <span>
+                              {nurse.ward ||
+                                "Not assigned"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* PHONE */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <FaPhoneAlt className="text-[#08764F] text-xs" />
+
+                            <span>
+                              {nurse.phone_number ||
+                                "Not available"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* STATUS */}
+                        <td className="px-5 py-4">
+                          {nurse.is_on_duty ? (
+                            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#08764F]/10 border border-[#08764F]/15 text-[#08764F] text-xs font-bold">
+                              <FaCheckCircle className="text-[10px]" />
+
+                              On Duty
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 border border-red-100 text-red-600 text-xs font-bold">
+                              <FaTimesCircle className="text-[10px]" />
+
+                              Off Duty
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* GOLD INFO CARD */}
+        {!loading && nurses.length > 0 && (
+          <div className="relative overflow-hidden flex items-start gap-3 rounded-2xl bg-gradient-to-r from-[#C6A24A]/15 to-[#E8D58C]/20 border border-[#C6A24A]/25 p-4">
+            <div className="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-[#C6A24A]/10" />
+
+            <div className="relative z-10 w-10 h-10 rounded-xl bg-[#C6A24A]/20 border border-[#C6A24A]/20 flex items-center justify-center shrink-0">
+              <FaUserNurse className="text-[#C6A24A]" />
+            </div>
+
+            <div className="relative z-10">
+              <p className="text-sm font-bold text-[#8B6A22]">
+                VitaCura Nursing Team
+              </p>
+
+              <p className="text-xs text-gray-600 mt-1 leading-5">
+                Keep nurse duty status, ward assignments and department
+                information updated so healthcare teams can coordinate
+                patient care effectively.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </DashboardLayout>
+  );
+}
+
+function NurseMobileCard({ nurse, initials }) {
+  return (
+    <div className="relative overflow-hidden bg-white border border-gray-200 rounded-[22px] shadow-[0_6px_20px_rgba(15,23,42,0.04)]">
+      <div className="h-1 bg-gradient-to-r from-[#8B6A22] via-[#C6A24A] to-[#E8D58C]" />
+
+      <div className="p-4">
+        {/* TOP */}
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-full bg-[#123B70]/10 border-2 border-[#C6A24A] flex items-center justify-center shrink-0">
+            <span className="text-[#123B70] text-sm font-extrabold">
+              {initials}
+            </span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="font-extrabold text-[#102033] truncate">
+              {nurse.full_name || "Unknown Nurse"}
+            </p>
+
+            <p className="text-xs text-gray-400 mt-1 truncate">
+              {nurse.email || "Email unavailable"}
+            </p>
+          </div>
+
+          {nurse.is_on_duty ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#08764F]/10 border border-[#08764F]/15 text-[#08764F] text-[10px] font-bold shrink-0">
+              <FaCheckCircle />
+              On Duty
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-red-50 border border-red-100 text-red-600 text-[10px] font-bold shrink-0">
+              <FaTimesCircle />
+              Off Duty
+            </span>
+          )}
+        </div>
+
+        {/* DETAILS */}
+        <div className="grid grid-cols-1 gap-3 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-3 bg-[#E8D58C]/15 rounded-xl p-3">
+            <div className="w-9 h-9 rounded-xl bg-[#C6A24A]/15 flex items-center justify-center shrink-0">
+              <FaHospital className="text-[#C6A24A] text-sm" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-wide text-gray-400 font-bold">
+                Department
+              </p>
+
+              <p className="text-sm font-semibold text-[#102033] mt-0.5 truncate">
+                {nurse.department || "General"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#123B70]/5 rounded-xl p-3">
+            <div className="w-9 h-9 rounded-xl bg-[#123B70]/10 flex items-center justify-center shrink-0">
+              <FaBed className="text-[#123B70] text-sm" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-wide text-gray-400 font-bold">
+                Ward
+              </p>
+
+              <p className="text-sm font-semibold text-[#102033] mt-0.5 truncate">
+                {nurse.ward || "Not assigned"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-[#08764F]/5 rounded-xl p-3">
+            <div className="w-9 h-9 rounded-xl bg-[#08764F]/10 flex items-center justify-center shrink-0">
+              <FaPhoneAlt className="text-[#08764F] text-sm" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-wide text-gray-400 font-bold">
+                Phone
+              </p>
+
+              <p className="text-sm font-semibold text-[#102033] mt-0.5">
+                {nurse.phone_number || "Not available"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  gold = false,
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 shadow-[0_6px_20px_rgba(15,23,42,0.04)] ${
+        gold
+          ? "bg-gradient-to-br from-white to-[#FFFDF6] border border-[#C6A24A]/25"
+          : "bg-white border border-gray-200"
+      }`}
+    >
+      {gold && (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8B6A22] via-[#C6A24A] to-[#E8D58C]" />
+      )}
+
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <p
+            className={`text-xs sm:text-sm font-medium ${
+              gold
+                ? "text-[#8B6A22]"
+                : "text-gray-500"
+            }`}
+          >
+            {title}
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#102033] mt-1 sm:mt-2">
+            {value}
+          </h2>
+
+          <p className="hidden sm:block text-xs text-gray-400 mt-2">
+            {subtitle}
+          </p>
+        </div>
+
+        <div
+          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${iconBg}`}
+        >
+          <Icon
+            className={`${iconColor} text-lg sm:text-xl`}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://backend-nfsd.onrender.com"; // Change to your Django server URL
+const API_URL = "http://192.168.100.12:8000/api/v1"; 
 
 const api = axios.create({
   baseURL: API_URL,
